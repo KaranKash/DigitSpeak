@@ -7,7 +7,7 @@ import numpy as np
 from multiprocessing import Pool
 from contextlib import closing
 
-MAX_EPOCHS = 10.0
+MAX_EPOCHS = 50.0
 
 # MNIST embeddings directory
 dataMnistdir = '../mnistAct/'
@@ -116,7 +116,7 @@ def main(use_gpu=True, restore_if_possible=True, batch_size=128):
                     epoch_count = (i // num_batches_per_epoch) + 1
 
                     # print status:
-                    print("Epoch %d. Batch %d/%d. Loss %.2f" % (epoch_count, in_batch+1, num_batches_per_epoch, batch_loss))
+                    print("Epoch %d. Batch %d/%d. Loss %.2f" % (epoch_count, in_batch, num_batches_per_epoch, batch_loss))
 
                     if in_batch + 1 == num_batches_per_epoch:
                         # Checkpoint, save the model:
@@ -136,4 +136,4 @@ def main(use_gpu=True, restore_if_possible=True, batch_size=128):
             sess.close()
 
 if __name__ == "__main__":
-    main(use_gpu=False)
+    main()
