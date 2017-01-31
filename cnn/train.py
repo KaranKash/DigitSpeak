@@ -34,7 +34,7 @@ def get_mismatch_mnist_embedding(label):
 def generate_mnist_set(labels):
     matches = []
     mismatches = []
-    labels = [(i,np.nonzero(labels[i])[0][0] % 10) for i in xrange(len(labels))]
+    labels = [(i,np.nonzero(labels[i])[0][0] % 10) for i in range(len(labels))]
     # define the number of CPU cores to be used concurrently
     with closing(Pool()) as pool:
         matches = pool.map(get_mnist_embedding, labels)
@@ -59,8 +59,8 @@ def get_new_index(inp):
 
 def permute_batch(labels):
     labels = [np.nonzero(label)[0][0] % 10 for label in labels]
-    inp = [(i,labels) for i in xrange(len(labels))]
-    # out = [get_new_index(i,labels) for i in xrange(len(labels))]
+    inp = [(i,labels) for i in range(len(labels))]
+    # out = [get_new_index(i,labels) for i in range(len(labels))]
     with closing(Pool()) as pool:
         indices = pool.map(get_new_index,inp)
     indices = [index[1] for index in sorted(indices)]
