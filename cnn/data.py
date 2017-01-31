@@ -16,8 +16,8 @@ spect_width = bin_freq  # Don't add one pixel of zeros on either side of the ima
 window_size = 100
 dim_Y = 11
 
-testdir = '/Users/karan/research/single_utterances/test'
-traindir = '/Users/karan/research/single_utterances/train'
+testdir = '../single_utterances/test'
+traindir = '../single_utterances/train'
 
 def load_from_file(f):
     '''Given a file, returns a list of the string values in that value'''

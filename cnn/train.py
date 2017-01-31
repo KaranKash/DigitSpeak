@@ -10,7 +10,7 @@ from contextlib import closing
 MAX_EPOCHS = 10.0
 
 # MNIST embeddings directory
-dataMnistdir = '../cnn_code/mnistAct/'
+dataMnistdir = '../mnistAct/'
 MNIST_DIM = 512
 
 def optimizer(num_batches_per_epoch):
