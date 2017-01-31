@@ -36,7 +36,7 @@ def load_from_file(f):
             if len(vector) == 0:
                 pass
             else:
-                print len(vector)
+                # print len(vector)
                 raise AssertionError
 
     # Now we have a list of length-23 vectors which we need to trim/pad to
