@@ -3,68 +3,18 @@ from utils import *
 from nn import *
 from model import *
 from data import *
+from load_data import *
 import numpy as np
 from multiprocessing import Pool
 from contextlib import closing
 
-MAX_EPOCHS = 50.0
-
-# MNIST embeddings directory
-dataMnistdir = '../mnistAct/'
-MNIST_DIM = 512
+MAX_EPOCHS = 10.0
 
 def optimizer(num_batches_per_epoch):
     global_step = tf.Variable(initial_value=0, trainable=False)
     increment_step = global_step.assign_add(1)
     opt = tf.train.AdamOptimizer()
     return increment_step, opt, global_step
-
-def get_mnist_embedding(label):
-    digit = label[1]
-    data = np.loadtxt(dataMnistdir + str(digit) + ".txt")
-    i = np.random.randint(0,len(data))
-    return label[0],data[i]
-
-def get_mismatch_mnist_embedding(label):
-    i = label[1]
-    while (i == label[1]):
-        i = np.random.randint(0,10)
-    return get_mnist_embedding((label[0],i))
-
-def generate_mnist_set(labels):
-    matches = []
-    mismatches = []
-    labels = [(i,np.nonzero(labels[i])[0][0] % 10) for i in range(len(labels))]
-    # define the number of CPU cores to be used concurrently
-    with closing(Pool()) as pool:
-        matches = pool.map(get_mnist_embedding, labels)
-        mismatches = pool.map(get_mismatch_mnist_embedding, labels)
-    # now transfer the list of return statements to the logfile
-    # for label in labels:
-    #     y_index = np.nonzero(label)[0][0] % 10
-    #     match = get_mnist_embedding(y_index)
-    #     mismatch = get_mismatch_mnist_embedding(y_index)
-    #     matches.append(match)
-    #     mismatches.append(mismatch)
-    matches = np.matrix([match[1] for match in sorted(matches)])
-    mismatches = np.matrix([mismatch[1] for mismatch in sorted(mismatches)])
-    return matches, mismatches
-
-def get_new_index(inp):
-    index,labels = inp
-    i = np.random.randint(0,len(labels))
-    while (labels[index] == labels[i]):
-        i = np.random.randint(0,len(labels))
-    return index,i
-
-def permute_batch(labels):
-    labels = [np.nonzero(label)[0][0] % 10 for label in labels]
-    inp = [(i,labels) for i in range(len(labels))]
-    # out = [get_new_index(i,labels) for i in range(len(labels))]
-    with closing(Pool()) as pool:
-        indices = pool.map(get_new_index,inp)
-    indices = [index[1] for index in sorted(indices)]
-    return indices
 
 def main(use_gpu=True, restore_if_possible=True, batch_size=128):
     with tf.device("/cpu:0"):
@@ -95,6 +45,7 @@ def main(use_gpu=True, restore_if_possible=True, batch_size=128):
             if restore_if_possible:
                 try:
                     saver.restore(sess, tf.train.latest_checkpoint(SAVED_MODEL_DIR))
+                    print("Found in-progress model. Will resume from there.")
                 except:
                     print("Couldn't find old model. Starting from scratch.")
 
@@ -136,4 +87,4 @@ def main(use_gpu=True, restore_if_possible=True, batch_size=128):
             sess.close()
 
 if __name__ == "__main__":
-    main()
+    main(use_gpu=False)
