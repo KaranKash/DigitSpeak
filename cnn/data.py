@@ -8,16 +8,16 @@ DIR = os.path.dirname(os.path.realpath(__file__))
 testdir = '../single_utterances/test'
 traindir = '../single_utterances/train'
 
+NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 4891
+NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 2325
+
 # Graph ops for loading, parsing, and queuing training images
 def input_graph(training=True, partition='test', batch_size=100):
     with tf.name_scope("input"):
         if training or partition == 'train':
-            # The training image files:
-            # filenames = [os.path.join(DIR, "cifar-10-batches-bin", "data_batch_%d.bin" % i) for i in range(1,6)]
             usedir = traindir
             num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
         elif partition == 'test':
-            # filenames = [os.path.join(DIR, "cifar-10-batches-bin", 'test_batch.bin')]
             usedir = testdir
             num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
@@ -27,8 +27,8 @@ def input_graph(training=True, partition='test', batch_size=100):
         X = X.reshape(X.shape[0],X.shape[1],X.shape[2],NUM_CHANNELS)
         X = tf.Variable(X)
 
-        # Reshape labels to (num_data,11,)
-        Y = Y.reshape(Y.shape[0],Y.shape[1],)
+        # Reshape labels to (num_data,11)
+        Y = Y.reshape(Y.shape[0],Y.shape[1])
         Y = tf.Variable(Y)
 
         image = X
@@ -48,5 +48,4 @@ def input_graph(training=True, partition='test', batch_size=100):
 
             # The examples and labels for training a single batch
             tf.summary.image("image", image_batch, max_outputs=3)
-            # labels = tf.squeeze(label_batch, axis=1)
             return image_batch, label_batch, num_examples_per_epoch

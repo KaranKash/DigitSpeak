@@ -27,7 +27,7 @@ def custom_loss(embeddings, mnist_batch, mismatch_mnist_batch, mismatch_spec_bat
     loss = compute_loss(embeddings, mnist_batch, mismatch_mnist_batch, mismatch_spec_batch)
     return loss
 
-def forward_propagation(images, labels, mnist_batch, mismatch_mnist_batch, indices, dropout=False, train=False):
+def forward_propagation(images, mnist_batch, mismatch_mnist_batch, indices, train=False):
     network = stack_layers([
         conv_layer1(name="conv1-layer"),
         max_pool_layer(name="max-pool1-layer"),
@@ -44,10 +44,12 @@ def forward_propagation(images, labels, mnist_batch, mismatch_mnist_batch, indic
     embeddings = network(images)
 
     with tf.name_scope('loss'):
-        print("Starting loss calculation...")
-        mismatch_spec_batch = tf.nn.embedding_lookup(embeddings, indices)
-        batch_loss = custom_loss(embeddings, mnist_batch, mismatch_mnist_batch, mismatch_spec_batch)
-        tf.add_to_collection('losses', batch_loss)
-        total_loss = tf.add_n(tf.get_collection('losses'), name='total_loss')
+        total_loss = tf.constant(0)
+        if train:
+            print("Starting loss calculation...")
+            mismatch_spec_batch = tf.nn.embedding_lookup(embeddings, indices)
+            batch_loss = custom_loss(embeddings, mnist_batch, mismatch_mnist_batch, mismatch_spec_batch)
+            tf.add_to_collection('losses', batch_loss)
+            total_loss = tf.add_n(tf.get_collection('losses'), name='total_loss')
 
     return embeddings, total_loss

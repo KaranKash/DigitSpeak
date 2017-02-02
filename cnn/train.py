@@ -16,9 +16,10 @@ def optimizer(num_batches_per_epoch):
     opt = tf.train.AdamOptimizer()
     return increment_step, opt, global_step
 
-def main(use_gpu=True, restore_if_possible=True, batch_size=128):
+def train_network(use_gpu=True, restore_if_possible=True, batch_size=128):
     with tf.device("/cpu:0"):
         # Build graph:
+        tf.set_random_seed(1)
         image_batch, label_batch, num_examples_per_epoch = input_graph(training=True, batch_size=batch_size)
         correct_mnist = tf.placeholder(tf.float32, shape=(batch_size, MNIST_DIM))
         mismatch_mnist = tf.placeholder(tf.float32, shape=(batch_size, MNIST_DIM))
@@ -26,8 +27,7 @@ def main(use_gpu=True, restore_if_possible=True, batch_size=128):
         num_batches_per_epoch = num_examples_per_epoch // batch_size
         increment_step, opt, step = optimizer(num_batches_per_epoch)
         with tf.device("/gpu:0" if use_gpu else "/cpu:0"):
-            # correct, loss, _ = forward_propagation(image_batch, label_batch, train=True)
-            embeddings, loss = forward_propagation(image_batch, label_batch, correct_mnist, mismatch_mnist, permutation, train=True)
+            embeddings, loss = forward_propagation(image_batch, correct_mnist, mismatch_mnist, permutation, train=True)
             grads = opt.compute_gradients(loss)
         with tf.control_dependencies([opt.apply_gradients(grads), increment_step]):
             train = tf.no_op(name='train')
@@ -56,10 +56,8 @@ def main(use_gpu=True, restore_if_possible=True, batch_size=128):
             try:
                 while ((not coord.should_stop()) and (epoch_count <= MAX_EPOCHS)):
                     labels, = sess.run([label_batch])
-                    print("Organizing data...")
                     mnist_batch, mismatch_mnist_batch = generate_mnist_set(labels)
                     indices = permute_batch(labels)
-                    print("Data organized.")
                     _, batch_loss, i = sess.run([train, loss, step], feed_dict={
                         correct_mnist: mnist_batch, mismatch_mnist: mismatch_mnist_batch, permutation: indices
                     })
@@ -87,4 +85,4 @@ def main(use_gpu=True, restore_if_possible=True, batch_size=128):
             sess.close()
 
 if __name__ == "__main__":
-    main(use_gpu=False)
+    train_network(use_gpu=False)

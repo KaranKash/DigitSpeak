@@ -7,8 +7,6 @@ IMAGE_HEIGHT = 100
 IMAGE_WIDTH = 23
 NUM_CHANNELS = 1
 NUM_CLASSES = 11
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 4891
-NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 2325
 
 bin_freq = 23
 spect_width = bin_freq  # Don't add one pixel of zeros on either side of the image
@@ -18,6 +16,8 @@ dim_Y = 11
 # MNIST embeddings directory
 dataMnistdir = '../mnistAct/'
 MNIST_DIM = 512
+
+mnist_data = {digit: np.loadtxt(dataMnistdir + str(digit) + ".txt") for digit in range(10)}
 
 def load_from_file(f):
     '''Given a file, returns a list of the string values in that value'''
@@ -99,7 +99,7 @@ def ld(rootdir):
 
 def get_mnist_embedding(label):
     digit = label[1]
-    data = np.loadtxt(dataMnistdir + str(digit) + ".txt")
+    data = mnist_data[digit] # np.loadtxt(dataMnistdir + str(digit) + ".txt")
     i = np.random.randint(0,len(data))
     return label[0],data[i]
 
