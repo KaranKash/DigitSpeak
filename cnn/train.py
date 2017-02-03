@@ -8,13 +8,14 @@ import numpy as np
 from multiprocessing import Pool
 from contextlib import closing
 
-MAX_EPOCHS = 10.0
+MAX_EPOCHS = 25.0
 
 def optimizer(num_batches_per_epoch):
-    global_step = tf.Variable(initial_value=0, trainable=False)
-    increment_step = global_step.assign_add(1)
-    opt = tf.train.AdamOptimizer()
-    return increment_step, opt, global_step
+    with tf.variable_scope("Optimizer"):
+        global_step = tf.Variable(initial_value=0, trainable=False)
+        increment_step = global_step.assign_add(1)
+        opt = tf.train.AdamOptimizer()
+        return increment_step, opt, global_step
 
 def train_network(use_gpu=True, restore_if_possible=True, batch_size=128):
     with tf.device("/cpu:0"):
@@ -56,6 +57,7 @@ def train_network(use_gpu=True, restore_if_possible=True, batch_size=128):
             try:
                 while ((not coord.should_stop()) and (epoch_count <= MAX_EPOCHS)):
                     labels, = sess.run([label_batch])
+                    labels = labels.flatten().tolist()
                     mnist_batch, mismatch_mnist_batch = generate_mnist_set(labels)
                     indices = permute_batch(labels)
                     _, batch_loss, i = sess.run([train, loss, step], feed_dict={

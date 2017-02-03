@@ -10,35 +10,43 @@ traindir = '../single_utterances/train'
 
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 4891
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 2325
+IMAGE_HEIGHT = 100
+IMAGE_WIDTH = 23
+NUM_CHANNELS = 1
+NUM_CLASSES = 11
+
+def read_from_csv(filename_queue):
+  reader = tf.TextLineReader()
+  _, csv_row = reader.read(filename_queue)
+  record_defaults = [["0"]] + [[0.0]]*2300
+  outlist = tf.decode_csv(csv_row, record_defaults=record_defaults)
+  image = tf.pack(outlist[1:])
+  label = tf.pack([outlist[0]])
+  return image, label
 
 # Graph ops for loading, parsing, and queuing training images
 def input_graph(training=True, partition='test', batch_size=100):
     with tf.name_scope("input"):
         if training or partition == 'train':
             usedir = traindir
+            target = "train.csv"
             num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
         elif partition == 'test':
             usedir = testdir
+            target = "test.csv"
             num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
-        X, Y = ld(usedir)
-
-        # Reshape input vectors for one input channel
-        X = X.reshape(X.shape[0],X.shape[1],X.shape[2],NUM_CHANNELS)
-        X = tf.Variable(X)
-
-        # Reshape labels to (num_data,11)
-        Y = Y.reshape(Y.shape[0],Y.shape[1])
-        Y = tf.Variable(Y)
-
-        image = X
-        record_label = Y
+        if not os.path.isfile(target):
+            ld(usedir,target)
+        filename_queue = tf.train.string_input_producer([target])
+        image, record_label = read_from_csv(filename_queue)
+        image = tf.cast(tf.reshape(image, [IMAGE_HEIGHT, IMAGE_WIDTH, NUM_CHANNELS]),tf.float32)
 
         with tf.name_scope("batching"):
             # Load set of images to start, then continue enqueuing up to capacity
             min_after_dequeue = int(num_examples_per_epoch * 0.8)
             capacity = min_after_dequeue + 20 * batch_size
-            kwargs = dict(batch_size=batch_size, capacity=capacity, enqueue_many=True)
+            kwargs = dict(batch_size=batch_size, capacity=capacity)
             if training:
                 batch_fn = tf.train.shuffle_batch
                 kwargs["min_after_dequeue"] = min_after_dequeue
