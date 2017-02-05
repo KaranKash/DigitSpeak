@@ -44,8 +44,8 @@ def input_graph(training=True, partition='test', batch_size=100):
 
         with tf.name_scope("batching"):
             # Load set of images to start, then continue enqueuing up to capacity
-            min_after_dequeue = int(num_examples_per_epoch * 0.8)
-            capacity = min_after_dequeue + 20 * batch_size
+            min_after_dequeue = 1000
+            capacity = min_after_dequeue + 3 * batch_size
             kwargs = dict(batch_size=batch_size, capacity=capacity)
             if training:
                 batch_fn = tf.train.shuffle_batch

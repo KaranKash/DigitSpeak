@@ -8,6 +8,7 @@ bin_freq = 23
 spect_width = bin_freq  # Don't add one pixel of zeros on either side of the image
 window_size = 100
 dim_Y = 11
+MEAN_SPEC = 10.786225977
 
 # MNIST embeddings directory
 dataMnistdir = '../mnistAct/'
@@ -26,7 +27,7 @@ def load_from_file(f):
         line = line.replace("]", "")
         line_chars = line.split()
         for char in line_chars:
-            vector.append(float(char))
+            vector.append(float(char)-MEAN_SPEC)
         try:
             assert len(vector) == bin_freq
             data.append(vector)

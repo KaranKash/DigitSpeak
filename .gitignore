@@ -1,3 +1,4 @@
 single_utterances
 model
 tflog*
+*.csv

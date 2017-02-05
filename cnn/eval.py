@@ -11,7 +11,6 @@ from contextlib import closing
 def evaluate(partition="train", batch_size=100):
     g = tf.Graph()
     with g.as_default():
-        tf.set_random_seed(1)
         with tf.device("/cpu:0"):
             # Build graph:
             image_batch, label_batch, num_examples_per_epoch = input_graph(training=False, partition=partition, batch_size=batch_size)
