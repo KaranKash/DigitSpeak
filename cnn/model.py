@@ -10,9 +10,9 @@ SAVED_MODEL_PATH = os.path.join(SAVED_MODEL_DIR, "model.ckpt")
 
 # compute custom loss function using tensors and tensor operations
 def compute_loss(embeddings, mnist_batch, mismatch_mnist_batch, mismatch_spec_batch):
-    # Linear projection MNIST
-    # W_m = tf.Variable(tf.truncated_normal([512,512]), name="W_m")
-    # b_m = tf.Variable(tf.truncated_normal([512]), name="b_m")
+    # # Linear projection MNIST
+    # W_m = tf.get_variable("W_m", [mnist_batch.get_shape()[0].value,embeddings.get_shape()[1].value], initializer=tf.contrib.layers.xavier_initializer())
+    # b_m = tf.get_variable("b_m", [embeddings.get_shape()[1].value], initializer=tf.contrib.layers.xavier_initializer())
     # mnist_batch = tf.add(tf.matmul(mnist_batch,W_m),b_m)
     # mismatch_mnist_batch = tf.add(tf.matmul(mismatch_mnist_batch,W_m),b_m)
 
@@ -58,4 +58,4 @@ def forward_propagation(images, mnist_batch, mismatch_mnist_batch, indices, trai
             tf.add_to_collection('losses', batch_loss)
             total_loss = tf.add_n(tf.get_collection('losses'), name='total_loss')
 
-    return embeddings, total_loss
+    return embeddings, batch_loss

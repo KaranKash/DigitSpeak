@@ -51,19 +51,23 @@ def train_network(use_gpu=True, restore_if_possible=True, batch_size=128):
         summaries = tf.summary.merge_all()
 
         # Train:
-        saver = tf.train.Saver()  # For saving the model
         with tf.Session(config=tf.ConfigProto(
                 log_device_placement=False)) as sess:
             summary_writer = tf.summary.FileWriter('tflog', sess.graph)  # For logging for TensorBoard
 
-            # Initialize the variables (like the epoch counter).
-            with tf.device("/cpu:0"): # Initialize variables on the main cpu
+            saver = tf.train.Saver()
+            with tf.device("/cpu:0"):
                 sess.run(tf.global_variables_initializer())
+
             if restore_if_possible:
                 try:
+                    # saver = tf.train.import_meta_graph('./model/model.ckpt-37.meta')
                     saver.restore(sess, tf.train.latest_checkpoint(SAVED_MODEL_DIR))
                     print("Found in-progress model. Will resume from there.")
                 except:
+                    # saver = tf.train.Saver()
+                    # with tf.device("/cpu:0"):
+                    #     sess.run(tf.global_variables_initializer())
                     print("Couldn't find old model. Starting from scratch.")
 
             # Start input enqueue threads.
@@ -82,13 +86,10 @@ def train_network(use_gpu=True, restore_if_possible=True, batch_size=128):
                     in_batch = i % num_batches_per_epoch
                     epoch_count = (i // num_batches_per_epoch) + 1
 
-                    # print status:
                     print("Epoch %d. Batch %d/%d. LR %.1e. Batch Loss %.2f" % (epoch_count, in_batch, num_batches_per_epoch, lrate, batch_loss))
 
                     if in_batch + 1 == num_batches_per_epoch:
                         # Checkpoint, save the model:
-                        # acc_annotation = eval_annotate()
-                        # acc_retrieval = eval_retrieve()
                         summary = sess.run(summaries)
                         summary_writer.add_summary(summary)
                         print("Saving to %s" % SAVED_MODEL_PATH)
@@ -103,24 +104,6 @@ def train_network(use_gpu=True, restore_if_possible=True, batch_size=128):
             # Wait for threads to finish.
             coord.join(threads)
             sess.close()
-
-# def eval_annotate(labels):
-#     # image annotation task
-#     num_correct = 0
-#     for i in range(len(labels)):
-#         mnist = get_mnist_embedding((0,get_label_map(labels[i])))[1]
-#         max_score, max_index = None, None
-#         for j in range(len(labels)):
-#             score = mnist.dot(spec_activations[j])
-#             if score > max_score:
-#                 max_score = score
-#                 max_index = j
-#         match = (get_label_map(labels[i]) == get_label_map(labels[max_index]))
-#         if match:
-#             num_correct += 1
-#     total = counter * batch_size
-#     acc_annotation = num_correct / float(total)
-
 
 if __name__ == "__main__":
     train_network(use_gpu=False)
