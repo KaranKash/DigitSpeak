@@ -57,6 +57,7 @@ def ld(rootdir,target):
                     y = 0
                 if filename[3]=='o':
                     y = 10
+                print(y)
                 y = int(y)
                 f = open(os.path.join(subdir, filename))
                 row = load_from_file(f)
