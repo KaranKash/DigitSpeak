@@ -49,7 +49,8 @@ def load_from_file(f):
 
 def ld(rootdir,target):
     with open(target, 'w', newline='') as datafile:
-        writer = csv.writer(datafile)
+        writer = csv.writer(datafile, delimiter=' ',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
         for subdir, dirs, files in os.walk(rootdir):
             for filename in files:
                 y = filename[3]
@@ -57,7 +58,6 @@ def ld(rootdir,target):
                     y = 0
                 if filename[3]=='o':
                     y = 10
-                print(y)
                 y = int(y)
                 f = open(os.path.join(subdir, filename))
                 row = load_from_file(f)
