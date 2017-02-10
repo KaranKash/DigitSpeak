@@ -48,7 +48,7 @@ def load_from_file(f):
     return data.flatten().tolist()
 
 def ld(rootdir,target):
-    with open(target, 'wb') as datafile:
+    with open(target, 'w', newline='') as datafile:
         writer = csv.writer(datafile)
         for subdir, dirs, files in os.walk(rootdir):
             for filename in files:
