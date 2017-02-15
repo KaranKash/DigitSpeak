@@ -19,7 +19,7 @@ def forward_propagation(images, labels, dropout=False, train=False):
         # # conv_layer(5, 1024, name='conv3-layer', padding='SAME'),
         # avg_pool_layer(name="avg-pool-layer"),
         flatten(),
-        fully_connected_layer(1024, keep_prob=0.5 if train and dropout else 1.0, name="local1-layer"),
+        fully_connected_layer(512, keep_prob=0.5 if train and dropout else 1.0, name="local1-layer"),
         # fully_connected_layer(1024, keep_prob=0.5 if train and dropout else 1.0, name="local2-layer"),
         softmax_layer(11)
     ])

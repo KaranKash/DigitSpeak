@@ -19,6 +19,8 @@ from audioclass_data import *
 #     opt = tf.train.GradientDescentOptimizer(lr)
 #     return increment_step, opt, lr, global_step
 
+MAX_EPOCHS = 5.0
+
 def optimizer():
     with tf.variable_scope("Optimizer"):
         global_step = tf.Variable(initial_value=0, trainable=False)
@@ -57,14 +59,15 @@ def main(use_gpu=True, restore_if_possible=True, batch_size=30):
             # Start input enqueue threads.
             coord = tf.train.Coordinator()
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-
+            epoch_count = None
             try:
-                while not coord.should_stop():
+                while ((not coord.should_stop()) and (epoch_count <= MAX_EPOCHS)):
                     _, num_correct, batch_loss, i = sess.run([train, correct, loss, step])
                     in_batch = i % num_batches_per_epoch
                     if in_batch == 0:
                         in_batch = num_batches_per_epoch
-                    print("Epoch %d. Batch %d/%d. Acc %.3f. Loss %.2f" % (i // num_batches_per_epoch + 1, in_batch, num_batches_per_epoch, 100*num_correct / float(batch_size), batch_loss))
+                    epoch_count = (i // num_batches_per_epoch) + 1
+                    print("Epoch %d. Batch %d/%d. Acc %.3f. Loss %.2f" % (epoch_count, in_batch, num_batches_per_epoch, 100*num_correct / float(batch_size), batch_loss))
                     if in_batch + 1 == num_batches_per_epoch:
                         # Checkpoint, save the model:
                         summary = sess.run(summaries)

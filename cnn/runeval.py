@@ -38,7 +38,6 @@ def evaluate(partition="train", batch_size=100):
                 try:
                     # image annotation task
                     counter = 0
-                    num_correct = 0
                     while ((counter * batch_size < num_examples_per_epoch) and not coord.should_stop()):
                         labels, spec_activations = sess.run([label_batch, embeddings])
                         labels = labels.flatten().tolist()
@@ -58,37 +57,33 @@ def evaluate(partition="train", batch_size=100):
                                 pass
                         counter += 1
 
-                    total = counter * batch_size
-                    acc_annotation = num_correct / float(total)
+                    # image retrieval task
+                    counter = 0
+                    while ((counter * batch_size < num_examples_per_epoch) and not coord.should_stop()):
+                        labels, spec_activations = sess.run([label_batch, embeddings])
+                        labels = labels.flatten().tolist()
+                        for i in range(len(labels)):
+                            label = labels[i]
+                            spec_act = spec_activations[i]
+                            max_score, mnist_label = None, None
+                            for j in range(10):
+                                for k in range(10):
+                                    mnist = get_mnist_embedding((0,j))[1]
+                                    score = mnist.dot(spec_act)
+                                    # print(j, score, label)
+                                    if score > max_score:
+                                        max_score = score
+                                        mnist_label = j
+                            match = (get_label_map(labels[i]) == mnist_label)
+                            if match:
+                                num_correct += 1
+                            else:
+                                print("Mistmatch: spec " + labels[i] + " returned " + str(mnist_label))
+                                pass
+                        counter += 1
 
-                    # # image retrieval task
-                    # counter = 0
-                    # num_correct = 0
-                    # while ((counter * batch_size < num_examples_per_epoch) and not coord.should_stop()):
-                    #     labels, spec_activations = sess.run([label_batch, embeddings])
-                    #     labels = labels.flatten().tolist()
-                    #     for i in range(len(labels)):
-                    #         label = labels[i]
-                    #         spec_act = spec_activations[i]
-                    #         max_score, mnist_label = None, None
-                    #         for j in range(10):
-                    #             for k in range(10):
-                    #                 mnist = get_mnist_embedding((0,j))[1]
-                    #                 score = mnist.dot(spec_act)
-                    #                 # print(j, score, label)
-                    #                 if score > max_score:
-                    #                     max_score = score
-                    #                     mnist_label = j
-                    #         match = (get_label_map(labels[i]) == mnist_label)
-                    #         if match:
-                    #             num_correct += 1
-                    #         else:
-                    #             print("Mistmatch: spec " + labels[i] + " returned " + str(mnist_label))
-                    #             pass
-                    #     counter += 1
-                    #
-                    # total = counter * batch_size
-                    # acc_retrieval = num_correct / float(total)
+                    total = counter * batch_size
+                    acc_retrieval = num_correct / float(total)
 
                 except tf.errors.OutOfRangeError:
                     print('Done training -- epoch limit reached')
@@ -101,6 +96,37 @@ def evaluate(partition="train", batch_size=100):
                 sess.close()
 
             return acc_annotation, acc_retrieval
+
+def annotate(labels, spec_activations, mnist_batch):
+    num_correct = 0
+    for i in range(len(labels)):
+        mnist = mnist_batch[i]
+        max_score, max_index = None, None
+        for j in range(len(labels)):
+            score = mnist.dot(spec_activations[j])
+            if score > max_score:
+                max_score = score
+                max_index = j
+        match = (get_label_map(labels[i]) == get_label_map(labels[max_index]))
+        if match:
+            num_correct += 1
+    return num_correct, len(labels)
+
+def retrieve(labels, spec_activations, mnist_batch):
+    num_correct = 0
+    for i in range(len(labels)):
+        spec = spec_activations[i].flatten()
+        max_score, max_index = None, None
+        for j in range(len(mnist_batch)):
+            mnist = mnist_batch[j].flatten()
+            score = mnist.dot(spec)
+            if score > max_score:
+                max_score = score
+                max_index = j
+        match = (get_label_map(labels[i]) == get_label_map(labels[max_index]))
+        if match:
+            num_correct += 1
+    return num_correct, len(labels)
 
 def main(batch_size=100):
     acc_annotation, acc_retrieval = evaluate(partition="test")

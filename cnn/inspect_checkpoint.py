@@ -76,7 +76,7 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.register("type", "bool", lambda v: v.lower() == "true")
   parser.add_argument(
-      "--file_name", type=str, default="/Users/karan/DigitSpeak/cnn/model/model.ckpt-189", help="Checkpoint filename. "
+      "--file_name", type=str, default="/Users/karan/DigitSpeak/cnn/model/model.ckpt-290", help="Checkpoint filename. "
                     "Note, if using Checkpoint V2 format, file_name is the "
                     "shared prefix between all files in the checkpoint.")
   parser.add_argument(

@@ -27,7 +27,8 @@ def load_from_file(f):
         line = line.replace("]", "")
         line_chars = line.split()
         for char in line_chars:
-            vector.append(float(char)-MEAN_SPEC)
+            # vector.append(float(char)-MEAN_SPEC)
+            vector.append(float(char))
         try:
             assert len(vector) == bin_freq
             data.append(vector)

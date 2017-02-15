@@ -10,11 +10,11 @@ SAVED_MODEL_PATH = os.path.join(SAVED_MODEL_DIR, "model.ckpt")
 
 # compute custom loss function using tensors and tensor operations
 def compute_loss(embeddings, mnist_batch, mismatch_mnist_batch, mismatch_spec_batch):
-    # # Linear projection MNIST
-    # W_m = tf.get_variable("W_m", [mnist_batch.get_shape()[0].value,embeddings.get_shape()[1].value], initializer=tf.contrib.layers.xavier_initializer())
-    # b_m = tf.get_variable("b_m", [embeddings.get_shape()[1].value], initializer=tf.contrib.layers.xavier_initializer())
-    # mnist_batch = tf.add(tf.matmul(mnist_batch,W_m),b_m)
-    # mismatch_mnist_batch = tf.add(tf.matmul(mismatch_mnist_batch,W_m),b_m)
+    # Linear projection MNIST
+    W_m = tf.get_variable("W_m", [mnist_batch.get_shape()[1].value,embeddings.get_shape()[1].value], initializer=tf.truncated_normal_initializer(stddev=0.1, dtype=tf.float32))
+    b_m = tf.get_variable("b_m", [embeddings.get_shape()[1].value], initializer=tf.constant_initializer(1.0, dtype=tf.float32))
+    mnist_batch = tf.add(tf.matmul(mnist_batch,W_m),b_m)
+    mismatch_mnist_batch = tf.add(tf.matmul(mismatch_mnist_batch,W_m),b_m)
 
     # Loss computation
     zero = tf.zeros(embeddings.get_shape()[0].value, tf.float32)
@@ -28,22 +28,29 @@ def compute_loss(embeddings, mnist_batch, mismatch_mnist_batch, mismatch_spec_ba
     max1 = tf.maximum(zero, tf.add_n([dot1, tf.negative(dot2), one]))
     max2 = tf.maximum(zero, tf.add_n([dot3, tf.negative(dot2), one]))
     loss = tf.reduce_sum(tf.add(max1,max2))
-    return loss
+    return loss, mnist_batch
 
-def forward_propagation(images, mnist_batch, mismatch_mnist_batch, indices, train=False):
+def forward_propagation(images, mnist_batch, mismatch_mnist_batch, indices, dropout=False, train=False):
     network = stack_layers([
-        conv_layer(5, 64, name='conv1-layer', padding='VALID'),
-        max_pool_layer(name="max-pool1-layer"),
-        # norm_layer(name="norm1-layer"),
-        conv_layer(5, 512, name='conv2-layer', padding='SAME'),
-        # norm_layer(name="norm2-layer"),
-        max_pool_layer(name="max-pool2-layer"),
-        # conv_layer(5, 1024, name='conv3-layer', padding='SAME'),
-        avg_pool_layer(name="avg-pool-layer"),
+        conv_layer(name='conv1-layer'),
+        pool_layer(name="max-pool1-layer"),
         flatten(),
-        # fully_connected_layer(384, name="local1-layer"),
-        # fully_connected_layer(192, keep_prob=0.5 if train and dropout else 1.0, name="local2-layer"),
+        fully_connected_layer(1024, keep_prob=0.5 if train and dropout else 1.0, name="local1-layer"),
+        fully_connected_layer(1024, keep_prob=1.0, name="local2-layer"),
         softmax_layer(11)
+
+        # conv_layer(5, 64, name='conv1-layer', padding='VALID'),
+        # max_pool_layer(name="max-pool1-layer"),
+        # # norm_layer(name="norm1-layer"),
+        # conv_layer(5, 512, name='conv2-layer', padding='SAME'),
+        # # norm_layer(name="norm2-layer"),
+        # max_pool_layer(name="max-pool2-layer"),
+        # # conv_layer(5, 1024, name='conv3-layer', padding='SAME'),
+        # avg_pool_layer(name="avg-pool-layer"),
+        # flatten(),
+        # # fully_connected_layer(384, name="local1-layer"),
+        # # fully_connected_layer(192, keep_prob=0.5 if train and dropout else 1.0, name="local2-layer"),
+        # softmax_layer(11)
     ])
     embeddings = network(images)
     # embeddings = tf.nn.l2_normalize(embeddings,0)
@@ -53,9 +60,6 @@ def forward_propagation(images, mnist_batch, mismatch_mnist_batch, indices, trai
         if train:
             print("Starting training loss calculation...")
             mismatch_spec_batch = tf.nn.embedding_lookup(embeddings, indices)
-            batch_loss = compute_loss(embeddings, mnist_batch, mismatch_mnist_batch, mismatch_spec_batch)
-            # tf.summary.scalar('batch loss', batch_loss)
-            tf.add_to_collection('losses', batch_loss)
-            total_loss = tf.add_n(tf.get_collection('losses'), name='total_loss')
+            batch_loss, mnist = compute_loss(embeddings, mnist_batch, mismatch_mnist_batch, mismatch_spec_batch)
 
-    return embeddings, batch_loss
+    return embeddings, batch_loss, mnist
