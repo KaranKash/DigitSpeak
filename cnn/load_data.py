@@ -79,9 +79,15 @@ def get_label_map(s):
 
 def get_mismatch_mnist_embedding(label):
     i = label[1]
-    while (i == label[1]):
-        i = np.random.randint(0,10)
-    return get_mnist_embedding((label[0],i))
+    out = None
+    for j in xrange(10):
+        if i != j:
+            _, data = get_mnist_embedding((label[0],j))
+            if out is None:
+                out = data
+            else:
+                out = np.vstack([out, data])
+    return label[0],out.flatten()
 
 def generate_mnist_set(labels):
     matches = []
@@ -90,21 +96,21 @@ def generate_mnist_set(labels):
     with closing(Pool()) as pool:
         matches = pool.map(get_mnist_embedding, labels)
         mismatches = pool.map(get_mismatch_mnist_embedding, labels)
-    matches = np.matrix([match[1] for match in sorted(matches)])
-    mismatches = np.matrix([mismatch[1] for mismatch in sorted(mismatches)])
-    return matches, mismatches
+    matches = np.array([match[1] for match in sorted(matches)])
+    mismatches = np.array([mismatch[1] for mismatch in sorted(mismatches)])
+    return matches, mismatches.reshape((len(labels),9,-1))
 
-def get_new_index(inp):
-    index,labels = inp
-    i = np.random.randint(0,len(labels))
-    while (labels[index] == labels[i]):
-        i = np.random.randint(0,len(labels))
-    return index,i
-
-def permute_batch(labels):
-    labels = [label_map[label] for label in labels]
-    inp = [(i,labels) for i in range(len(labels))]
-    with closing(Pool()) as pool:
-        indices = pool.map(get_new_index,inp)
-    indices = [index[1] for index in sorted(indices)]
-    return indices
+# def get_new_index(inp):
+#     index,labels = inp
+#     i = np.random.randint(0,len(labels))
+#     while (labels[index] == labels[i]):
+#         i = np.random.randint(0,len(labels))
+#     return index,i
+#
+# def permute_batch(labels):
+#     labels = [label_map[label] for label in labels]
+#     inp = [(i,labels) for i in range(len(labels))]
+#     with closing(Pool()) as pool:
+#         indices = pool.map(get_new_index,inp)
+#     indices = [index[1] for index in sorted(indices)]
+#     return indices

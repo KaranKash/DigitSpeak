@@ -41,7 +41,6 @@ def fully_connected_layer(size, keep_prob=1.0, name='fc-layer'):
                 bias = bias_variable(size)
             with tf.name_scope('preactivation'):
                 preactivation = tf.matmul(input_to_layer, weights) + bias
-                logits = preactivation
             with tf.name_scope('output'):
                 full_output = tf.nn.relu(preactivation)
                 output = tf.nn.dropout(full_output, keep_prob=keep_prob)
