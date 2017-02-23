@@ -117,7 +117,7 @@ def train_network(use_gpu=True, restore_if_possible=True, batch_size=30):
 
 def accuracy(labels, spec_activations, mnist_set, mismatch_set):
     num_correct = 0.
-    for i in xrange(len(labels)):
+    for i in range(len(labels)):
         spec = spec_activations[i].flatten()
         mnist = mnist_set[i].flatten()
         base_score = mnist.dot(spec)
@@ -139,4 +139,4 @@ def run_eval(labels, spec_activations, mnist_batch):
     print("Retrieval accuracy: " + str(100*correct/total) + "%")
 
 if __name__ == "__main__":
-    train_network(use_gpu=False)
+    train_network(use_gpu=True)

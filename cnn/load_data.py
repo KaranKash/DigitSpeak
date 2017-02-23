@@ -80,7 +80,7 @@ def get_label_map(s):
 def get_mismatch_mnist_embedding(label):
     i = label[1]
     out = None
-    for j in xrange(10):
+    for j in range(10):
         if i != j:
             _, data = get_mnist_embedding((label[0],j))
             if out is None:
@@ -92,7 +92,7 @@ def get_mismatch_mnist_embedding(label):
 def generate_mnist_set(labels):
     matches = []
     mismatches = []
-    labels = [(i, label_map[labels[i]]) for i in range(len(labels))]
+    labels = [(i, label_map[labels[i].decode('utf-8')]) for i in range(len(labels))]
     with closing(Pool()) as pool:
         matches = pool.map(get_mnist_embedding, labels)
         mismatches = pool.map(get_mismatch_mnist_embedding, labels)
