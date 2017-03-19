@@ -4,11 +4,12 @@ import itertools
 from xml.dom import minidom
 import wave
 import shutil
-
 from Sequence import Sequence
 from Digit import Digit
 import xml.etree.ElementTree as ET
+
 digitsByName = {'CERO':0, 'UNO':1,'DOS':2, 'TRES':3, 'CUATRO':4,'CINCO':5,'SEIS':6,'SIETE':7,'OCHO':8,'NUEVE':9}
+
 def CreateFolderStructure(rootFolder):
     os.makedirs(rootFolder)
     for key, value in digitsByName.items():
@@ -26,12 +27,11 @@ def ParseXMLFile(xmlFileName):
     device = rootNode.find('Device').text
     typeSequence = rootNode.find('TypeSequence').text
     digits = rootNode.find('Digits').text
-    digitsNode = rootNode.find('Digits')
     digitsById = []
 
     for digitNode in rootNode.findall('./Digits/digit'):
-        print(digitNode)
-        print ("digitNode")
+        # print(digitNode)
+        # print ("digitNode")
         #check for null value
         id = digitNode.find('digit_number').text
         digitName = digitNode.find('digit_name').text
@@ -41,7 +41,7 @@ def ParseXMLFile(xmlFileName):
         endTightDigit = digitNode.find('end_tight_digit').text
         digit = Digit(id, startDigit, endDigit, startTightDigit, endTightDigit,digitName)
         digitsById.append(digit)
-    sequence = Sequence(idSpeaker, idSession,device, typeSequence,digitsById)
+    sequence = Sequence(idSpeaker, idSession, device, typeSequence, digitsById)
     return sequence
 
 def SegmentAudioFiles(audioFile, digitsBySegmentLen):
@@ -53,13 +53,13 @@ def SegmentAudioFiles(audioFile, digitsBySegmentLen):
     sampWidth = origAudio.getsampwidth()
     dictFolderNames = {0:'CERO', 1:'UNO',2:'DOS', 3:'TRES', 4:'CUATRO',5:'CINCO',6:'SEIS',7:'SIETE', 8:'OCHO',9:'NUEVE'}
 
-    print ("number of frames in the audio file =",nframes)
-    print ("number of channels in the audio file =",nChannels)
-    print ("frame rate = ", frameRate)
+    # print ("number of frames in the audio file =",nframes)
+    # print ("number of channels in the audio file =",nChannels)
+    # print ("frame rate = ", frameRate)
 
     for digitNumber, values in digitsBySegmentLen.items():
         startValue, endValue = int(values[0]), int(values[1])
-        print ("startValue, endValue ", startValue, endValue )
+        # print ("startValue, endValue ", startValue, endValue )
         origAudio.setpos(startValue)
         chunkData = origAudio.readframes((endValue-startValue))
         origAudio.tell()

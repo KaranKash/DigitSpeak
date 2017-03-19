@@ -14,7 +14,7 @@ class AudioSegmentation(object):
         if not os.path.exists(rootFolder):
             CreateFolderStructure(rootFolder)
         audioFiles = GetAudioFiles(self.folderPath)
-        print (audioFiles)
+        # print (audioFiles)
 
         #get corresponding xml files
         for audioFile in audioFiles:
@@ -38,13 +38,13 @@ class AudioSegmentation(object):
                             endDigit = digit.endTightDigit
                         else:
                             endDigit = digit.endDigit
-                        print ("startDigit: " + startDigit)
-                        print ("endDigit" + endDigit)
+                        # print ("startDigit: " + startDigit)
+                        # print ("endDigit" + endDigit)
                         break
                     else:
                         continue
                 digitsBySegmentLen[digitNo] = (startDigit, endDigit)
-            print (digitsBySegmentLen)
+            # print (digitsBySegmentLen)
 
             segmentedFiles = SegmentAudioFiles(audioFile, digitsBySegmentLen)
 
