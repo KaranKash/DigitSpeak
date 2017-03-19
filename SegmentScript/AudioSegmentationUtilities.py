@@ -27,20 +27,22 @@ def ParseXMLFile(xmlFileName):
     device = rootNode.find('Device').text
     typeSequence = rootNode.find('TypeSequence').text
     digits = rootNode.find('Digits').text
+    digits = digits.split()
+
     digitsById = []
-    print "ALL DIGITS", rootNode.findall('./Digits/digit')
-    for digitNode in rootNode.findall('./Digits/digit'):
-        print(digitNode)
-        print ("digitNode")
-        #check for null value
-        id = digitNode.find('digit_number').text
-        digitName = digitNode.find('digit_name').text
+    for i in range(11):
+        digitNode = rootNode.find('digit' + str(i+1))
+        if not digitNode:
+            break
+        digitName = digits[i]
+        digitId = digitsByName[digitName]
         startDigit = digitNode.find('start_digit').text
         endDigit = digitNode.find('end_digit').text
         startTightDigit = digitNode.find('start_tight_digit').text
         endTightDigit = digitNode.find('end_tight_digit').text
-        digit = Digit(id, startDigit, endDigit, startTightDigit, endTightDigit,digitName)
+        digit = Digit(digitId, startDigit, endDigit, startTightDigit, endTightDigit,digitName)
         digitsById.append(digit)
+
     sequence = Sequence(idSpeaker, idSession, device, typeSequence, digitsById)
     return sequence
 
