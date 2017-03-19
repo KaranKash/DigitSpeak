@@ -38,8 +38,8 @@ class AudioSegmentation(object):
                             endDigit = digit.endTightDigit
                         else:
                             endDigit = digit.endDigit
-                        # print ("startDigit: " + startDigit)
-                        # print ("endDigit" + endDigit)
+                        print ("startDigit: " + startDigit)
+                        print ("endDigit" + endDigit)
                         break
                     else:
                         continue
