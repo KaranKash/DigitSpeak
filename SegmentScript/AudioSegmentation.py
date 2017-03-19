@@ -20,11 +20,11 @@ class AudioSegmentation(object):
         for audioFile in audioFiles:
             xmlFile = os.path.splitext(audioFile)[0] + '.xml'
             objSequence = ParseXMLFile(xmlFile)
-
-
             strDigitsInXML = os.path.splitext(audioFile)[0].rsplit('-', 1)[1]
             lstDigits = list(strDigitsInXML)
             digitById = objSequence.digitsById
+            print digitsById
+            print lstDigits
             digitsBySegmentLen = {}
             for digitNo in lstDigits:
                 for digit in digitById:
