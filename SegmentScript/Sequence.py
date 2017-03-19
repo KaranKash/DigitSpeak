@@ -1,7 +1,7 @@
 class Sequence(object):
     def __init__(self):
         self.IdSpeaker = ''
-        self.sessionId = ''
+        self.IdSession = ''
         self.device = ''
         self.typeSequence = ''
         #self.digits = '';
@@ -9,7 +9,7 @@ class Sequence(object):
 
     def __init__(self, speakerId, sessionId,device, typeSequence,digitsByID):
         self.IdSpeaker = speakerId
-        self.sessionId = sessionId
+        self.IdSession = sessionId
         self.device = device
         self.typeSequence = typeSequence
         #self.digits = digits;

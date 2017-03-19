@@ -22,7 +22,7 @@ def ParseXMLFile(xmlFileName):
     xmlDoc = ET.parse(xmlFileName)
     rootNode = xmlDoc.getroot()
     idSpeaker = rootNode.find('IdSpeaker').text
-    idSession = rootNode.find('sessionId').text
+    idSession = rootNode.find('IdSession').text
     device = rootNode.find('Device').text
     typeSequence = rootNode.find('TypeSequence').text
     digits = rootNode.find('Digits').text
