@@ -28,10 +28,10 @@ def ParseXMLFile(xmlFileName):
     typeSequence = rootNode.find('TypeSequence').text
     digits = rootNode.find('Digits').text
     digitsById = []
-
+    print "ALL DIGITS", rootNode.findall('./Digits/digit')
     for digitNode in rootNode.findall('./Digits/digit'):
-        # print(digitNode)
-        # print ("digitNode")
+        print(digitNode)
+        print ("digitNode")
         #check for null value
         id = digitNode.find('digit_number').text
         digitName = digitNode.find('digit_name').text

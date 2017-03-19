@@ -23,7 +23,6 @@ class AudioSegmentation(object):
             strDigitsInXML = os.path.splitext(audioFile)[0].rsplit('-', 1)[1]
             lstDigits = list(strDigitsInXML)
             digitById = objSequence.digitsById
-            print objSequence
             print digitById
             print lstDigits
             digitsBySegmentLen = {}
