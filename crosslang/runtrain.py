@@ -9,7 +9,7 @@ import numpy as np
 from multiprocessing import Pool
 from contextlib import closing
 
-MAX_EPOCHS = 150.0
+MAX_EPOCHS = 100.0
 
 def optimizer(num_batches_per_epoch):
     with tf.variable_scope("Optimizer"):
@@ -76,10 +76,20 @@ def train_network(use_gpu=True, restore_if_possible=True, english_batch=50, span
             epoch_count = 1
             try:
                 # training, alternate steps between spanish and english
-                while not coord.should_stop():
+                while ((not coord.should_stop()) and (epoch_count <= MAX_EPOCHS)):
                     # English
                     labels, spec_activations = sess.run([e_label_batch, e_embeddings])
                     labels = labels.flatten().tolist()
+
+                    if epoch_count == MAX_EPOCHS:
+                        for i in range(len(labels)):
+                            spec = spec_activations[i]
+                            spec = spec.reshape((1,512))
+                            label = labels[i]
+                            f = open("./English/" + str(label) + ".txt",'a')
+                            np.savetxt(f,spec)
+                            f.close()
+
                     mnist_batch, mismatch_mnist_batch = generate_mnist_set(labels)
                     # indices = permute_batch(labels)
                     _, batch_loss, i, mnist_set, mismatch_set = sess.run([e_train, e_loss, e_step, e_mnist, e_mismatch], feed_dict={
@@ -97,6 +107,16 @@ def train_network(use_gpu=True, restore_if_possible=True, english_batch=50, span
                     # Spanish
                     labels, spec_activations = sess.run([s_label_batch, s_embeddings])
                     labels = labels.flatten().tolist()
+
+                    if epoch_count == MAX_EPOCHS:
+                        for i in range(len(labels)):
+                            spec = spec_activations[i]
+                            spec = spec.reshape((1,512))
+                            label = labels[i]
+                            f = open("./Spanish/" + str(label) + ".txt",'a')
+                            np.savetxt(f,spec)
+                            f.close()
+
                     mnist_batch, mismatch_mnist_batch = generate_mnist_set(labels)
                     # indices = permute_batch(labels)
                     _, batch_loss, i, mnist_set, mismatch_set = sess.run([s_train, s_loss, s_step, s_mnist, s_mismatch], feed_dict={
