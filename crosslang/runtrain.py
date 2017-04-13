@@ -4,7 +4,7 @@ from nn import *
 from model import *
 from data import *
 from load_data import *
-from runeval import *
+#from runeval import *
 import numpy as np
 from multiprocessing import Pool
 from contextlib import closing
