@@ -10,7 +10,7 @@ from multiprocessing import Pool
 from contextlib import closing
 
 
-MAX_EPOCHS = 1.0
+MAX_EPOCHS = 80.0
 
 def optimizer(num_batches_per_epoch):
     with tf.variable_scope("Optimizer"):
@@ -19,8 +19,7 @@ def optimizer(num_batches_per_epoch):
         opt = tf.train.AdamOptimizer(0.00001)
         return increment_step, opt, global_step
 
-#70 85
-def train_network(use_gpu=True, restore_if_possible=True, english_batch=200, spanish_batch=246):
+def train_network(use_gpu=True, restore_if_possible=True, english_batch=70, spanish_batch=85):
     with tf.device("/cpu:0"):
         # Build English graph:
         e_image_batch, e_label_batch, e_num_examples_per_epoch = english_input_graph(training=True, batch_size=english_batch)
