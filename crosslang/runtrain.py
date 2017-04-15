@@ -9,6 +9,7 @@ import numpy as np
 from multiprocessing import Pool
 from contextlib import closing
 
+
 MAX_EPOCHS = 100.0
 
 def optimizer(num_batches_per_epoch):
