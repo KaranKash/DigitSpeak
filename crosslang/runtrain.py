@@ -10,7 +10,7 @@ from multiprocessing import Pool
 from contextlib import closing
 
 
-MAX_EPOCHS = 100.0
+MAX_EPOCHS = 1.0
 
 def optimizer(num_batches_per_epoch):
     with tf.variable_scope("Optimizer"):
@@ -19,7 +19,8 @@ def optimizer(num_batches_per_epoch):
         opt = tf.train.AdamOptimizer(0.00001)
         return increment_step, opt, global_step
 
-def train_network(use_gpu=True, restore_if_possible=True, english_batch=50, spanish_batch=121):
+#70 85
+def train_network(use_gpu=True, restore_if_possible=True, english_batch=200, spanish_batch=246):
     with tf.device("/cpu:0"):
         # Build English graph:
         e_image_batch, e_label_batch, e_num_examples_per_epoch = english_input_graph(training=True, batch_size=english_batch)
@@ -87,7 +88,7 @@ def train_network(use_gpu=True, restore_if_possible=True, english_batch=50, span
                             spec = spec_activations[i]
                             spec = spec.reshape((1,512))
                             label = labels[i]
-                            f = open("./English/" + str(label) + ".txt",'a')
+                            f = open("./English/" + str(label).decode('utf-8') + ".txt",'a')
                             np.savetxt(f,spec)
                             f.close()
 
@@ -114,7 +115,34 @@ def train_network(use_gpu=True, restore_if_possible=True, english_batch=50, span
                             spec = spec_activations[i]
                             spec = spec.reshape((1,512))
                             label = labels[i]
-                            f = open("./Spanish/" + str(label) + ".txt",'a')
+                            f = open("./Spanish/" + str(label).decode('utf-8') + ".txt",'a')
+                            np.savetxt(f,spec)
+                            f.close()
+
+                    mnist_batch, mismatch_mnist_batch = generate_mnist_set(labels)
+                    # indices = permute_batch(labels)
+                    _, batch_loss, i, mnist_set, mismatch_set = sess.run([s_train, s_loss, s_step, s_mnist, s_mismatch], feed_dict={
+                        s_correct_mnist: mnist_batch, s_mismatch_mnist: mismatch_mnist_batch
+                    })
+                    in_batch = i % s_num_batches_per_epoch
+                    if in_batch == 0:
+                        in_batch = s_num_batches_per_epoch
+                    epoch_count = (i // (s_num_batches_per_epoch+1)) + 1
+
+                    acc = accuracy(labels, spec_activations, mnist_set, mismatch_set)
+
+                    print("Spanish. Epoch %d. Batch %d/%d. Batch Loss %.2f. Acc %.2f." % (epoch_count, in_batch, s_num_batches_per_epoch, batch_loss, acc*100))
+
+                    # Spanish
+                    labels, spec_activations = sess.run([s_label_batch, s_embeddings])
+                    labels = labels.flatten().tolist()
+
+                    if epoch_count == MAX_EPOCHS:
+                        for i in range(len(labels)):
+                            spec = spec_activations[i]
+                            spec = spec.reshape((1,512))
+                            label = labels[i]
+                            f = open("./Spanish/" + str(label).decode('utf-8') + ".txt",'a')
                             np.savetxt(f,spec)
                             f.close()
 
