@@ -88,7 +88,7 @@ def train_network(use_gpu=True, restore_if_possible=True, english_batch=200, spa
                             spec = spec_activations[i]
                             spec = spec.reshape((1,512))
                             label = labels[i]
-                            f = open("./English/" + str(label) + ".txt",'a')
+                            f = open("./English/" + str(label) + ".txt",'ab')
                             np.savetxt(f,spec)
                             f.close()
 
@@ -115,7 +115,7 @@ def train_network(use_gpu=True, restore_if_possible=True, english_batch=200, spa
                             spec = spec_activations[i]
                             spec = spec.reshape((1,512))
                             label = labels[i]
-                            f = open("./Spanish/" + str(label) + ".txt",'a')
+                            f = open("./Spanish/" + str(label) + ".txt",'ab')
                             np.savetxt(f,spec)
                             f.close()
 
@@ -142,7 +142,7 @@ def train_network(use_gpu=True, restore_if_possible=True, english_batch=200, spa
                             spec = spec_activations[i]
                             spec = spec.reshape((1,512))
                             label = labels[i]
-                            f = open("./Spanish/" + str(label) + ".txt",'a')
+                            f = open("./Spanish/" + str(label) + ".txt",'ab')
                             np.savetxt(f,spec)
                             f.close()
 
