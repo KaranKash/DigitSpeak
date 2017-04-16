@@ -10,7 +10,7 @@ from multiprocessing import Pool
 from contextlib import closing
 
 
-MAX_EPOCHS = 100.0
+MAX_EPOCHS = 80.0
 
 def optimizer(num_batches_per_epoch):
     with tf.variable_scope("Optimizer"):
@@ -74,15 +74,16 @@ def train_network(use_gpu=True, restore_if_possible=True, english_batch=75, span
             # Start input enqueue threads.
             coord = tf.train.Coordinator()
             threads = tf.train.start_queue_runners(sess=sess, coord=coord)
-            epoch_count = 1
+            e_epoch_count = 1
+            s_epoch_count = 1
             try:
                 # training, alternate steps between spanish and english
-                while ((not coord.should_stop()) and (epoch_count <= MAX_EPOCHS)):
+                while ((not coord.should_stop()) and (e_epoch_count <= MAX_EPOCHS)):
                     # English
                     labels, spec_activations = sess.run([e_label_batch, e_embeddings])
                     labels = labels.flatten().tolist()
 
-                    if epoch_count == MAX_EPOCHS:
+                    if e_epoch_count == MAX_EPOCHS:
                         for i in range(len(labels)):
                             spec = spec_activations[i]
                             spec = spec.reshape((1,512))
@@ -99,17 +100,17 @@ def train_network(use_gpu=True, restore_if_possible=True, english_batch=75, span
                     in_batch = i % e_num_batches_per_epoch
                     if in_batch == 0:
                         in_batch = e_num_batches_per_epoch
-                    epoch_count = (i // (e_num_batches_per_epoch+1)) + 1
+                    e_epoch_count = ((i-1) // (e_num_batches_per_epoch)) + 1
 
                     acc = accuracy(labels, spec_activations, mnist_set, mismatch_set)
 
-                    print("English. Epoch %d. Batch %d/%d. Batch Loss %.2f. Acc %.2f." % (epoch_count, in_batch, e_num_batches_per_epoch, batch_loss, acc*100))
+                    print("English. Epoch %d. Batch %d/%d. Batch Loss %.2f. Acc %.2f." % (e_epoch_count, in_batch, e_num_batches_per_epoch, batch_loss, acc*100))
 
                     # Spanish
                     labels, spec_activations = sess.run([s_label_batch, s_embeddings])
                     labels = labels.flatten().tolist()
 
-                    if epoch_count == MAX_EPOCHS:
+                    if s_epoch_count == MAX_EPOCHS:
                         for i in range(len(labels)):
                             spec = spec_activations[i]
                             spec = spec.reshape((1,512))
@@ -126,17 +127,17 @@ def train_network(use_gpu=True, restore_if_possible=True, english_batch=75, span
                     in_batch = i % s_num_batches_per_epoch
                     if in_batch == 0:
                         in_batch = s_num_batches_per_epoch
-                    epoch_count = (i // (s_num_batches_per_epoch+1)) + 1
+                    s_epoch_count = ((i-1) // (s_num_batches_per_epoch)) + 1
 
                     acc = accuracy(labels, spec_activations, mnist_set, mismatch_set)
 
-                    print("Spanish. Epoch %d. Batch %d/%d. Batch Loss %.2f. Acc %.2f." % (epoch_count, in_batch, s_num_batches_per_epoch, batch_loss, acc*100))
+                    print("Spanish. Epoch %d. Batch %d/%d. Batch Loss %.2f. Acc %.2f." % (s_epoch_count, in_batch, s_num_batches_per_epoch, batch_loss, acc*100))
 
                     # Spanish
                     labels, spec_activations = sess.run([s_label_batch, s_embeddings])
                     labels = labels.flatten().tolist()
 
-                    if epoch_count == MAX_EPOCHS:
+                    if s_epoch_count == MAX_EPOCHS:
                         for i in range(len(labels)):
                             spec = spec_activations[i]
                             spec = spec.reshape((1,512))
@@ -153,11 +154,11 @@ def train_network(use_gpu=True, restore_if_possible=True, english_batch=75, span
                     in_batch = i % s_num_batches_per_epoch
                     if in_batch == 0:
                         in_batch = s_num_batches_per_epoch
-                    epoch_count = (i // (s_num_batches_per_epoch+1)) + 1
+                    s_epoch_count = ((i-1) // (s_num_batches_per_epoch)) + 1
 
                     acc = accuracy(labels, spec_activations, mnist_set, mismatch_set)
 
-                    print("Spanish. Epoch %d. Batch %d/%d. Batch Loss %.2f. Acc %.2f." % (epoch_count, in_batch, s_num_batches_per_epoch, batch_loss, acc*100))
+                    print("Spanish. Epoch %d. Batch %d/%d. Batch Loss %.2f. Acc %.2f." % (s_epoch_count, in_batch, s_num_batches_per_epoch, batch_loss, acc*100))
 
                     if in_batch == s_num_batches_per_epoch:
                         # Checkpoint, save the model:
